@@ -69,14 +69,14 @@ func Close() {
 
 // Count is the count of TODO items in the store
 func Count() int {
-	todoStore.mutex.Lock()
-	defer todoStore.mutex.Unlock()
+	todoStore.mutex.RLock()
+	defer todoStore.mutex.RUnlock()
 	return len(todoStore.store)
 }
 
 func GetRecord(userId string, todoNumber string) Todo {
-	todoStore.mutex.Lock()
-	defer todoStore.mutex.Unlock()
+	todoStore.mutex.RLock()
+	defer todoStore.mutex.RUnlock()
 	return todoStore.store[getKey(userId, todoNumber)]
 }
 
