@@ -171,7 +171,7 @@ func RemoveRecord(userId string, todoNumber string) error {
 	return nil
 }
 
-func SortedTodos() []string {
+func SortedTodos(userId int, todoNumber int) []string {
 	if !todoStore.Open {
 		return []string{}
 	}
@@ -179,11 +179,35 @@ func SortedTodos() []string {
 	data := make([]string, Count())
 	i := 0
 	for _, record := range todoStore.store {
+		if record.UserId != userId {
+			continue
+		}
+
+		if todoNumber != -1 && record.TodoNumber != todoNumber {
+			continue
+		}
+
 		data[i] = fmt.Sprintf("[UserId]: %s [TodoNumber]: %s [Todo Item]: %s [Todo Status]: %s \n", strconv.Itoa(record.UserId), strconv.Itoa(record.TodoNumber), record.TodoItem, record.Status)
 		i++
 	}
+
+	if i == 0 {
+		// No records found
+		return []string{}
+	}
+
 	sort.Strings(data)
-	return data
+	retVal := make([]string, i)
+	i = 0
+	for j := 0; j < len(data); j++ {
+
+		if len(data[j]) != 0 {
+			retVal[i] = data[j]
+			i++
+		}
+	}
+
+	return retVal
 }
 
 func WriteTodosToFile() error {

@@ -28,15 +28,9 @@ func HandleUpdate(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	if requestUrl == nil {
-		utils.Logger.Println("URL is nil")
-		writers.WriteResponse(writer, http.StatusBadRequest)
-		return
-	}
-
 	utils.Logger.Println("Path = " + requestUrl.Path)
 	urlArgs := strings.Split(requestUrl.Path[1:], consts.PathSeparator)
-	if len(urlArgs) < 5 || len(urlArgs[1]) == 0 {
+	if len(urlArgs) < 5 || len(urlArgs[consts.UrlHttpVerb]) == 0 {
 		utils.Logger.Println("Error: null-length todo item")
 		writers.WriteResponseWithMessage(writer, http.StatusBadRequest, "Error: null-length todo item")
 		return
@@ -48,13 +42,13 @@ func HandleUpdate(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	err = store.UpdateRecord(urlArgs[consts.UrlSegmentUserId], urlArgs[consts.UrlTodoNumber], urlArgs[consts.UrlTodoDescription], strings.ToLower(urlArgs[consts.UrlTodoDescription]))
+	err = store.UpdateRecord(urlArgs[consts.UrlTodoUserId], urlArgs[consts.UrlTodoNumber], urlArgs[consts.UrlTodoDescription], strings.ToLower(urlArgs[consts.UrlTodoDescription]))
 	if err != nil {
 		utils.Logger.Println(err.Error())
 		writers.WriteResponseWithMessage(writer, http.StatusBadRequest, err.Error())
 		return
 	} else {
-		n, err := writer.Write([]byte("Item updated for userId: " + urlArgs[consts.UrlSegmentUserId]))
+		n, err := writer.Write([]byte("Item updated for userId: " + urlArgs[consts.UrlTodoUserId]))
 		if err != nil {
 			utils.Logger.Println("Error calling writer.Write: " + err.Error())
 			writers.WriteResponse(writer, http.StatusInternalServerError)

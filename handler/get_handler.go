@@ -29,21 +29,22 @@ func HandleGet(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	if requestUrl == nil {
-		utils.Logger.Println("URL is nil")
-		writers.WriteResponse(writer, http.StatusBadRequest)
+	utils.Logger.Println("Path = " + requestUrl.Path + " ")
+	urlArgs := strings.Split(requestUrl.Path[1:], consts.PathSeparator)
+	if len(urlArgs) < 2 || len(urlArgs[consts.UrlHttpVerb]) == 0 {
+		utils.Logger.Println("Error: null-length todo item")
+		writers.WriteResponseWithMessage(writer, http.StatusBadRequest, "Error: null-length todo item")
 		return
 	}
 
-	utils.Logger.Println("Path = " + requestUrl.Path + " ")
-	urlArgs := strings.Split(requestUrl.Path[1:], consts.PathSeparator)
 	utils.Logger.Println("Get entered with: " + strconv.Itoa(len(urlArgs)) + " items")
 
 	if len(urlArgs) == 3 {
 		// Get a specific todo
-		userId, _ := strconv.Atoi(urlArgs[consts.UrlTodoNumber])
-		todo := store.SortedTodos()[userId]
-		writers.WriteResponseWithMessage(writer, http.StatusOK, todo)
+		userId, _ := strconv.Atoi(urlArgs[consts.UrlTodoUserId])
+		todoNumber, _ := strconv.Atoi(urlArgs[consts.UrlTodoNumber])
+		data := store.SortedTodos(userId, todoNumber)
+		writers.WriteResponseWithMessage(writer, http.StatusOK, data[0])
 
 	} else {
 		t, err := template.New("ToDoItems").ParseFiles("templates/layout.html")
@@ -52,11 +53,19 @@ func HandleGet(writer http.ResponseWriter, request *http.Request) {
 			writers.WriteResponse(writer, http.StatusBadRequest)
 			return
 		}
-		err = t.ExecuteTemplate(writer, "T", store.SortedTodos())
-		if err != nil {
-			utils.Logger.Println(err.Error())
-			writers.WriteResponse(writer, http.StatusBadRequest)
-			return
+
+		userId, _ := strconv.Atoi(urlArgs[consts.UrlTodoUserId])
+		data := store.SortedTodos(userId, -1)
+
+		if len(data) == 0 {
+			writers.WriteResponseWithMessage(writer, http.StatusOK, "No records found!")
+		} else {
+			err = t.ExecuteTemplate(writer, "T", data)
+			if err != nil {
+				utils.Logger.Println(err.Error())
+				writers.WriteResponse(writer, http.StatusBadRequest)
+				return
+			}
 		}
 	}
 }

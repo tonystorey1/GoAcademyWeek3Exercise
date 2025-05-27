@@ -27,21 +27,15 @@ func HandleDelete(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	if requestUrl == nil {
-		utils.Logger.Println("URL is nil")
-		writers.WriteResponse(writer, http.StatusBadRequest)
-		return
-	}
-
 	utils.Logger.Println("Path = " + requestUrl.Path)
 	urlArgs := strings.Split(requestUrl.Path[1:], consts.PathSeparator)
-	if len(urlArgs) < 3 || len(urlArgs[1]) == 0 {
+	if len(urlArgs) < 3 || len(urlArgs[consts.UrlHttpVerb]) == 0 {
 		utils.Logger.Println("Error: null-length todo item")
 		writers.WriteResponseWithMessage(writer, http.StatusBadRequest, "Error: null-length todo item")
 		return
 	}
 
-	err = store.RemoveRecord(urlArgs[consts.UrlSegmentUserId], urlArgs[consts.UrlTodoNumber])
+	err = store.RemoveRecord(urlArgs[consts.UrlTodoUserId], urlArgs[consts.UrlTodoNumber])
 	if err != nil {
 		utils.Logger.Print(err)
 		writers.WriteResponseWithMessage(writer, http.StatusInternalServerError, err.Error())
@@ -54,8 +48,8 @@ func HandleDelete(writer http.ResponseWriter, request *http.Request) {
 			return
 		}
 
-		utils.Logger.Println("Item deleted" + urlArgs[consts.UrlSegmentUserId])
-		_, err := writer.Write([]byte("Item deleted: " + urlArgs[consts.UrlSegmentUserId]))
+		utils.Logger.Println("Item deleted" + urlArgs[consts.UrlTodoUserId])
+		_, err := writer.Write([]byte("Item deleted: " + urlArgs[consts.UrlTodoUserId]))
 		if err != nil {
 			utils.Logger.Println("Error calling writer.Write: " + err.Error())
 			writers.WriteResponseWithMessage(writer, http.StatusInternalServerError, err.Error())
