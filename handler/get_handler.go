@@ -16,8 +16,8 @@ func HandleGet(writer http.ResponseWriter, request *http.Request) {
 	utils.Logger.SetPrefix(request.Context().Value("TraceID ").(string))
 	utils.Logger.Println("Calling the get handler")
 
-	if request.Method != "GET" {
-		utils.Logger.Println("Method is not GET")
+	if request.Method != http.MethodGet {
+		utils.Logger.Println("Method is not " + http.MethodGet)
 		writers.WriteResponse(writer, http.StatusMethodNotAllowed)
 		return
 	}

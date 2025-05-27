@@ -15,8 +15,8 @@ func HandleUpdate(writer http.ResponseWriter, request *http.Request) {
 	utils.Logger.SetPrefix(request.Context().Value("TraceID ").(string))
 	utils.Logger.Println("Calling the Update handler")
 
-	if request.Method != "PUT" {
-		utils.Logger.Println("Method is not PUT")
+	if request.Method != http.MethodPut {
+		utils.Logger.Println("Method is not " + http.MethodPut)
 		writers.WriteResponse(writer, http.StatusMethodNotAllowed)
 		return
 	}

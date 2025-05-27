@@ -14,8 +14,8 @@ func HandleDelete(writer http.ResponseWriter, request *http.Request) {
 	utils.Logger.SetPrefix(request.Context().Value("TraceID ").(string))
 	utils.Logger.Println("Calling the Delete handler")
 
-	if request.Method != "DELETE" {
-		utils.Logger.Println("Method is not DELETE")
+	if request.Method != http.MethodDelete {
+		utils.Logger.Println("Method is not " + http.MethodDelete)
 		writers.WriteResponse(writer, http.StatusMethodNotAllowed)
 		return
 	}

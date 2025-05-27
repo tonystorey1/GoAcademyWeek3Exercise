@@ -15,8 +15,8 @@ func HandleAdd(writer http.ResponseWriter, request *http.Request) {
 	utils.Logger.SetPrefix(request.Context().Value("TraceID ").(string))
 	utils.Logger.Println("Calling the Add handler")
 
-	if request.Method != "POST" {
-		utils.Logger.Println("Method is not POST")
+	if request.Method != http.MethodPost {
+		utils.Logger.Println("Method is not " + http.MethodPost)
 		writers.WriteResponse(writer, http.StatusMethodNotAllowed)
 		return
 	}
