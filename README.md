@@ -1,1 +1,0 @@
-# GoAcademyWeek3Exercise
