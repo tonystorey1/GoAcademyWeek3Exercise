@@ -1,0 +1,6 @@
+{{define "T"}}Current todo items{{.}}{{end}}
+<ul>
+  {{ range . }}
+  <li>{{ . }}</li><br>
+  {{ end }}
+</ul>
