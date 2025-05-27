@@ -24,7 +24,7 @@ type Todo struct {
 type TodoStore struct {
 	store map[string]Todo
 	mutex sync.RWMutex
-	open  bool
+	Open  bool
 }
 
 var (
@@ -33,15 +33,15 @@ var (
 
 	fileMutex sync.RWMutex
 
-	storeNotOpen = errors.New("store not open")
+	ErrStoreNotOpen = errors.New("store not open")
 
-	storeAlreadyOpen = errors.New("store already open")
+	ErrStoreAlreadyOpen = errors.New("store already open")
 )
 
 // Open opens the store with the supplied CSV file and loads the contents. If csvFile is nil it will open empty.
 func Open(csvFile *os.File) error {
-	if todoStore.isOpen() {
-		return storeAlreadyOpen
+	if todoStore.Open {
+		return ErrStoreAlreadyOpen
 	} else {
 		err := todoStore.openStore(csvFile)
 		if err != nil {
@@ -55,14 +55,14 @@ func Open(csvFile *os.File) error {
 
 // Close - closes the store and removes all records
 func Close() {
-	if !todoStore.isOpen() {
+	if !todoStore.Open {
 		utils.Logger.Println("Store already closed")
 		return
 	} else {
 		todoStore.mutex.Lock()
 		defer todoStore.mutex.Unlock()
 		todoStore.store = nil
-		todoStore.open = false
+		todoStore.Open = false
 		fmt.Println("Store closed")
 	}
 }
@@ -81,8 +81,8 @@ func GetRecord(userId string, todoNumber string) Todo {
 }
 
 func PutRecord(userId string, todoNumber string, description string, newStatus string) error {
-	if todoStore.isClosed() {
-		return storeNotOpen
+	if !todoStore.Open {
+		return ErrStoreNotOpen
 	}
 
 	if userId == "" || !isNumeric(userId) {
@@ -112,8 +112,8 @@ func PutRecord(userId string, todoNumber string, description string, newStatus s
 }
 
 func UpdateRecord(userId string, todoNumber string, description string, newStatus string) error {
-	if todoStore.isClosed() {
-		return storeNotOpen
+	if !todoStore.Open {
+		return ErrStoreNotOpen
 	}
 
 	if userId == "" || !isNumeric(userId) {
@@ -143,8 +143,8 @@ func UpdateRecord(userId string, todoNumber string, description string, newStatu
 }
 
 func RemoveRecord(userId string, todoNumber string) error {
-	if todoStore.isClosed() {
-		return storeNotOpen
+	if !todoStore.Open {
+		return ErrStoreNotOpen
 	}
 
 	if userId == "" || !isNumeric(userId) {
@@ -172,7 +172,7 @@ func RemoveRecord(userId string, todoNumber string) error {
 }
 
 func SortedTodos() []string {
-	if todoStore.isClosed() {
+	if !todoStore.Open {
 		return []string{}
 	}
 
@@ -247,17 +247,9 @@ func isNumeric(s string) bool {
 	return err == nil
 }
 
-func (store *TodoStore) isOpen() bool {
-	return store.open
-}
-
-func (store *TodoStore) isClosed() bool {
-	return !store.isOpen()
-}
-
 func (store *TodoStore) openStore(csvFile *os.File) error {
 	store.store = make(map[string]Todo)
-	store.open = true
+	store.Open = true
 
 	if csvFile != nil {
 		err := loadTodoItems(csvFile)
