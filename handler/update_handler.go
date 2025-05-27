@@ -35,26 +35,26 @@ func HandleUpdate(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	utils.Logger.Println("Path = " + requestUrl.Path)
-	items := strings.Split(requestUrl.Path[1:], consts.PathSeparator)
-	if len(items) < 5 || len(items[1]) == 0 {
+	urlArgs := strings.Split(requestUrl.Path[1:], consts.PathSeparator)
+	if len(urlArgs) < 5 || len(urlArgs[1]) == 0 {
 		utils.Logger.Println("Error: null-length todo item")
 		writers.WriteResponseWithMessage(writer, http.StatusBadRequest, "Error: null-length todo item")
 		return
 	}
 
-	if !utils.IsStatusValid(items[4]) {
+	if !utils.IsStatusValid(urlArgs[consts.UrlTodoNumber]) {
 		utils.Logger.Println("Error: supplied status is not valid")
 		writers.WriteResponseWithMessage(writer, http.StatusBadRequest, "Error: supplied status is not valid, it must be either  \"not started\", \"started\", or \"completed\"")
 		return
 	}
 
-	err = store.UpdateRecord(items[1], items[2], items[3], strings.ToLower(items[4]))
+	err = store.UpdateRecord(urlArgs[consts.UrlSegmentUserId], urlArgs[consts.UrlTodoNumber], urlArgs[consts.UrlTodoDescription], strings.ToLower(urlArgs[consts.UrlTodoDescription]))
 	if err != nil {
 		utils.Logger.Println(err.Error())
 		writers.WriteResponseWithMessage(writer, http.StatusBadRequest, err.Error())
 		return
 	} else {
-		n, err := writer.Write([]byte("Item updated: " + items[1]))
+		n, err := writer.Write([]byte("Item updated for userId: " + urlArgs[consts.UrlSegmentUserId]))
 		if err != nil {
 			utils.Logger.Println("Error calling writer.Write: " + err.Error())
 			writers.WriteResponse(writer, http.StatusInternalServerError)

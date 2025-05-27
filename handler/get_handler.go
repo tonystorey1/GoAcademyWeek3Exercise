@@ -36,12 +36,12 @@ func HandleGet(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	utils.Logger.Println("Path = " + requestUrl.Path + " ")
-	items := strings.Split(requestUrl.Path[1:], consts.PathSeparator)
-	utils.Logger.Println("Get entered with: " + strconv.Itoa(len(items)) + " items")
+	urlArgs := strings.Split(requestUrl.Path[1:], consts.PathSeparator)
+	utils.Logger.Println("Get entered with: " + strconv.Itoa(len(urlArgs)) + " items")
 
-	if len(items) == 3 {
+	if len(urlArgs) == 3 {
 		// Get a specific todo
-		userId, _ := strconv.Atoi(items[2])
+		userId, _ := strconv.Atoi(urlArgs[consts.UrlTodoNumber])
 		todo := store.SortedTodos()[userId]
 		writers.WriteResponseWithMessage(writer, http.StatusOK, todo)
 
